@@ -2,12 +2,16 @@ import Files.PayLoad;
 import io.restassured.path.json.JsonPath;
 import org.testng.Assert;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import  static io.restassured.RestAssured.*;
 import  static      io.restassured.matcher.RestAssuredMatchers.*;
 import  static      org.hamcrest.Matchers.*;
 
 public class Basic {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
 baseURI ="https://rahulshettyacademy.com";
 
@@ -17,10 +21,9 @@ given()
         .log().all()
         .queryParam("key","qaclick123")
         .header("Content-Type","application/json")
-        .body(PayLoad.callBody())
-
-
-.when()
+        .body(new String(Files.readAllBytes(Paths.get("C:\\Users\\ZONE\\Desktop\\rahuel\\sika.json"))))
+       // .body(PayLoad.callBody())
+        .when()
         .post("/maps/api/place/add/json")
 
 

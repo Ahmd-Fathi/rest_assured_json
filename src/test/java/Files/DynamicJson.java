@@ -7,7 +7,8 @@ import io.restassured.path.json.JsonPath;
 import org.testng.annotations.Test;
 
 public class DynamicJson {
-
+// convert data file to string becouze body just take string
+    // the process is i should convert data from file to byte then convert to string
     @Test
     public void AddBook()
     {
