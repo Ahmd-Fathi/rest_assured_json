@@ -1,82 +1,87 @@
 import Files.PayLoad;
 import io.restassured.path.json.JsonPath;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
-import static io.restassured.RestAssured.*;
-import static io.restassured.matcher.RestAssuredMatchers.*;
-import static org.hamcrest.Matchers.*;
+import  static io.restassured.RestAssured.*;
+import  static      io.restassured.matcher.RestAssuredMatchers.*;
+import  static      org.hamcrest.Matchers.*;
 
 public class Basic {
-    @Test
-    public void endToEndApis() {
-        baseURI = "https://rahulshettyacademy.com";
-// post Request/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        String FirstRequest = given().log().all().queryParam("key", "qaclick123")
-                .header("Content-Type", "application/json")
-                .body(PayLoad.BodyForPostData())
+    public static void main(String[] args) {
+
+baseURI ="https://rahulshettyacademy.com";
+
+//////////////////// /////////post request///////////////////////////////////////////////////////////////////////////////////////////////////
+        String postResponse=
+given()
+        .log().all()
+        .queryParam("key","qaclick123")
+        .header("Content-Type","application/json")
+        .body(PayLoad.callBody())
 
 
-                .when().post("/maps/api/place/add/json")
+.when()
+        .post("/maps/api/place/add/json")
 
 
-                .then().assertThat().statusCode(200)
-                .body("scope", equalTo("APP"))
-                .header("Server", "Apache/2.4.52 (Ubuntu)")
-                .extract().response().asString();
 
-        JsonPath js = new JsonPath(FirstRequest);
-
-        String Status = js.getString("status");
-        String Scope = js.getString("scope");
-        String placeID = js.getString("place_id");
-        System.out.println(Status);
-        System.out.println(Scope);
+.then()
+        .log().all()
+        .assertThat().statusCode(200)
+        .body("scope",equalTo("APP"))
+        .header("Server","Apache/2.4.52 (Ubuntu)")
+        .extract().response().asString();
+        JsonPath js=new JsonPath(postResponse);
+        String placeID=js.getString("place_id");
         System.out.println(placeID);
-        Assert.assertEquals(Status, "OK");
-// update Request/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       String scopeResponse= js.getString("scope");
+        Assert.assertEquals(scopeResponse,"APP");
 
-        String secondRequestPutData = given().queryParam("key", "qaclick123")
-                .header("Content-Type", "application/json")
-                .body("{\n" +
-                        "\"place_id\":\"" + placeID + "\",\n" +
-                        "\"address\":\"70 Summer walk, USA\",\n" +
-                        "\"key\":\"qaclick123\"\n" +
-                        "}")
+//////////////////// /////////Update request///////////////////////////////////////////////////////////////////////////////////////////////////
+String newAddress="70 Summer walk, USA";
+String putResponse=
+given()
+        .log().all()
+        .queryParam("key","qaclick123")
+        .header("Content-Type","application/json")
+        .body("{\n" +
+                "\"place_id\":\""+placeID+"\",\n" +
+                "\"address\":\"70 Summer walk, USA\",\n" +
+                "\"key\":\"qaclick123\"\n" +
+                "}\n")
 
-                .when().put("/maps/api/place/update/json")
-
-                .then().log().all().assertThat().statusCode(200)
-                .extract().response().asString();
-        JsonPath js2 = new JsonPath(secondRequestPutData);
-        String MSGResponse = js2.getString("msg");
-
-        Assert.assertEquals(MSGResponse, "Address successfully updated");
-
-// get request  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        given().queryParam("key", "qaclick123")
-                .queryParam("place_id", placeID)
-
-                .when().get("/maps/api/place/get/json")
-
-                .then().assertThat().statusCode(200)
-                .extract().response().asString();
-// Delete request  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+.when()
+        .put("/maps/api/place/update/json")
 
 
-        String DeleteRequest = given().queryParam("key", "qaclick123")
-                .body("{\n" +
-                        "    \"place_id\":\"" + placeID + "\"\n" +
-                        "}")
+.then()
+        .log().all()
+        .assertThat().statusCode(200)
+        .extract().response().asString();
+        JsonPath js1=new JsonPath(putResponse);
+        String successfullyMessageAfterChangeAddress =js1.getString("msg");
+        Assert.assertEquals(successfullyMessageAfterChangeAddress
+        ,"Address successfully updated");
+
+//////////////////// /////////Get request///////////////////////////////////////////////////////////////////////////////////////////////////
+
+        String getResponse=
+given()
+        .queryParam("key","qaclick123")
+        .queryParam("place_id",placeID)
 
 
-                .when().delete("/maps/api/place/delete/json")
+.when()
+        .get("/maps/api/place/get/json")
 
 
-                .then().assertThat().statusCode(200)
-                .extract().response().asString();
-        JsonPath js3 = new JsonPath(DeleteRequest);
-        String statusCode = js3.getString("status");
-        Assert.assertEquals(statusCode, "OK");
+.then()
+        .log().all()
+        .extract().response().asString();
+         JsonPath js2=new JsonPath(getResponse);
+         String currentAddress=js2.getString("address");
+         Assert.assertEquals(currentAddress,newAddress);
+
+
     }
 }
